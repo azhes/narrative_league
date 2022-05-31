@@ -1,5 +1,4 @@
 import math
-from tkinter.font import names
 import xlrd
 
 class Bracket:
@@ -9,9 +8,10 @@ class Bracket:
         self.top = bottom + 1 + divide
 
 class Player:
-    def __init__(self, name, score):
+    def __init__(self, name, score, faction):
         self.name = name
         self.score = score
+        self.faction = faction
         self.bracket = None
 
 def get_data():
@@ -22,7 +22,7 @@ def get_data():
     num_players = sheet.nrows
     player_dict = {}
     for i in range(num_players):
-        player_dict[sheet.cell_value(i,0)] = sheet.cell_value(i,1)
+        player_dict[sheet.cell_value(i,0)] = {"Score": sheet.cell_value(i,1), "Faction": sheet.cell_value(i,2)}
 
     return num_players, player_dict
 
@@ -41,7 +41,7 @@ def create_brackets(highest_score, num_brackets=5):
 def create_players(player_dict):
     players_list = []
     for player in player_dict:
-        player = Player(player, player_dict[player])
+        player = Player(player, player_dict[player]["Score"], player_dict[player]["Faction"])
         players_list.append(player)
 
     return players_list
@@ -55,7 +55,12 @@ def populate_brackets(players_list, brackets):
 def main(): 
     num_players, player_dict = get_data()
 
-    highest_score = max(player_dict.values())
+    scores = []
+
+    for value in player_dict.values():
+        scores.append(int(value["Score"]))
+
+    highest_score = max(scores)
 
     brackets = create_brackets(highest_score)
     print('Brackets:')
@@ -68,7 +73,7 @@ def main():
     
     print('Players:')
     for player in players_list:
-        print(f'{player.name}: {player.score}\n Bracket: {player.bracket.bottom} - {player.bracket.top}\n')
+        print(f'{player.name}: {player.score}\n Faction: {player.faction}\n Bracket: {player.bracket.bottom} - {player.bracket.top}\n')
     
 
 main()
