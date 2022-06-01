@@ -26,16 +26,18 @@ def get_data():
 
     return num_players, player_dict
 
-def create_brackets(highest_score, lowest_score, num_brackets=5):
+def create_brackets(highest_score, lowest_score, num_brackets=3):
     divide = math.ceil((highest_score - lowest_score) / num_brackets)
-    print(divide)
-    bracket1 = Bracket(divide, lowest_score)
-    bracket2 = Bracket(divide, bracket1.top + 1)
-    bracket3 = Bracket(divide, bracket2.top + 1)
-    bracket4 = Bracket(divide, bracket3.top + 1)
-    bracket5 = Bracket(divide, bracket4.top + 1)
+    
+    brackets = []
 
-    brackets = [bracket1, bracket2, bracket3, bracket4, bracket5]
+    for i in range(num_brackets):
+        if len(brackets) == 0:
+            bracket = Bracket(divide, lowest_score)
+        else:
+            bracket = Bracket(divide, brackets[-1].top + 1)
+
+        brackets.append(bracket)
 
     highest_bracket = Bracket(divide, highest_score)
     highest_bracket.top = highest_score
@@ -75,15 +77,18 @@ def main():
     lowest_score = min(scores)
 
     brackets, highest_bracket = create_brackets(highest_score, lowest_score)
+
+    players_list = create_players(player_dict)
+
+    populate_brackets(players_list, brackets, highest_bracket, scores)  
+
+    brackets[-1].top = highest_score - 1
+
     print('Brackets:')
     for bracket in brackets:
         print(f'{bracket.bottom} - {bracket.top}')
 
-    print(f'Sector Lord: {highest_bracket.bottom}')
-
-    players_list = create_players(player_dict)
-
-    populate_brackets(players_list, brackets, highest_bracket, scores)
+    print(f'Sector Lord: {highest_bracket.bottom}\n')
     
     print('Players:')
     for player in players_list:
@@ -92,4 +97,5 @@ def main():
         else:
             print(f'{player.name}: {player.score}\n Faction: {player.faction}\n Bracket: {player.bracket.bottom} - {player.bracket.top}\n')
 
-main()
+if __name__ == "__main__":
+    main()
