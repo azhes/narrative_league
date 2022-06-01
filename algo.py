@@ -1,5 +1,9 @@
 import math
 import xlrd
+import gspread
+
+sa = gspread.service_account(filename="stronghold-narrative-league-4b33cd5a00d9.json")
+
 
 class Bracket:
     def __init__(self, divide, bottom):
@@ -15,14 +19,16 @@ class Player:
         self.bracket = None
 
 def get_data():
-    loc = ("test_scores.xls")
-    wb = xlrd.open_workbook(loc)
-    sheet = wb.sheet_by_index(0)
 
-    num_players = sheet.nrows
+    wks = sa.open("Stronghold Narrative League").sheet1
+
+    players = wks.col_values(1)
+
+    num_players = len(players)
+
     player_dict = {}
     for i in range(num_players):
-        player_dict[sheet.cell_value(i,0)] = {"Score": sheet.cell_value(i,1), "Faction": sheet.cell_value(i,2)}
+        player_dict[wks.cell(i + 1, 1).value] = {"Score": int(wks.cell(i + 1, 2).value), "Faction": wks.cell(i + 1, 3).value}
 
     return num_players, player_dict
 
@@ -60,11 +66,12 @@ def populate_brackets(players_list, brackets, highest_bracket, scores):
             if bracket.bottom <= player.score <= bracket.top:
                 player.bracket = bracket
             if player.score == max(scores):
-                player.bracket = highest_bracket
+                player.bracket = highest_bracket    
 
-    
+def main():
+    get_data()
 
-def main(): 
+
     num_players, player_dict = get_data()
 
     scores = []
