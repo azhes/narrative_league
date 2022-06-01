@@ -150,5 +150,7 @@ def main():
 
     write_to_sheets(brackets, highest_bracket, players_list, highest_score)
 
+    print(f'Successfully updated!')
+
 if __name__ == "__main__":
     main()
