@@ -72,9 +72,11 @@ def write_to_sheets(brackets, highest_bracket, players_list, highest_score):
     wks.update_cell(1, 6, 'Brackets')
     wks.update_cell(1, 7, 'Minimum Score')
     wks.update_cell(1, 8, 'Maximum Score')
+    wks.update_cell(1, 9, 'Players')
     wks.format('F1', {'textFormat': {'bold': True}})
     wks.format('G1', {'textFormat': {'bold': True}})
     wks.format('H1', {'textFormat': {'bold': True}})
+    wks.format('I1', {'textFormat': {'bold': True}})
 
     for i in range(len(brackets)):
         wks.update_cell(i + 2, 6, f'Bracket {i + 1}')
@@ -83,8 +85,9 @@ def write_to_sheets(brackets, highest_bracket, players_list, highest_score):
         players_in_bracket = ''
         for player in players_list:
             if brackets[i].bottom < player.score < brackets[i].top:
-                players_in_bracket += f'{player.name} '
-        wks.update_cell(i + 2, 9, players_in_bracket)
+                players_in_bracket += f'{player.name}, '
+        new_string = players_in_bracket[:-2]
+        wks.update_cell(i + 2, 9, new_string)
 
     wks.update_cell(1, 13, 'Sector Lord')
     wks.format('M1', {"backgroundColor": {
