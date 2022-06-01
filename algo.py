@@ -4,6 +4,8 @@ import gspread
 
 sa = gspread.service_account(filename="stronghold-narrative-league-4b33cd5a00d9.json")
 
+wks = sa.open("Stronghold Narrative League").sheet1
+
 
 class Bracket:
     def __init__(self, divide, bottom):
@@ -19,8 +21,6 @@ class Player:
         self.bracket = None
 
 def get_data():
-
-    wks = sa.open("Stronghold Narrative League").sheet1
 
     players = wks.col_values(1)
 
@@ -68,6 +68,47 @@ def populate_brackets(players_list, brackets, highest_bracket, scores):
             if player.score == max(scores):
                 player.bracket = highest_bracket    
 
+def write_to_sheets(brackets, highest_bracket, players_list, highest_score):
+    wks.update_cell(1, 6, 'Brackets')
+    wks.update_cell(1, 7, 'Minimum Score')
+    wks.update_cell(1, 8, 'Maximum Score')
+    wks.format('F1', {'textFormat': {'bold': True}})
+    wks.format('G1', {'textFormat': {'bold': True}})
+    wks.format('H1', {'textFormat': {'bold': True}})
+
+    for i in range(len(brackets)):
+        wks.update_cell(i + 2, 6, f'Bracket {i + 1}')
+        wks.update_cell(i + 2, 7, brackets[i].bottom)
+        wks.update_cell(i + 2, 8, brackets[i].top)
+        players_in_bracket = ''
+        for player in players_list:
+            if brackets[i].bottom < player.score < brackets[i].top:
+                players_in_bracket += f'{player.name} '
+        wks.update_cell(i + 2, 9, players_in_bracket)
+
+    wks.update_cell(1, 13, 'Sector Lord')
+    wks.format('M1', {"backgroundColor": {
+        "red": 255,
+        "green": 50,
+        "blue": 20
+    },
+    "textFormat": {
+        "foregroundColor": {
+            "red": 255,
+            "blue": 255,
+            "green": 255
+        }
+    }})
+
+    sector_lord = None
+
+    for player in players_list:
+        if player.score == highest_score:
+            sector_lord = player.name
+
+    wks.update_cell(1, 14, sector_lord)
+    wks.update_cell(1, 15, highest_bracket.top)
+
 def main():
     get_data()
 
@@ -103,6 +144,8 @@ def main():
             print(f'{player.name}: {player.score}\n Faction: {player.faction}\n Bracket: {player.bracket.bottom} - {player.bracket.top}\n Sector Lord!\n')
         else:
             print(f'{player.name}: {player.score}\n Faction: {player.faction}\n Bracket: {player.bracket.bottom} - {player.bracket.top}\n')
+
+    write_to_sheets(brackets, highest_bracket, players_list, highest_score)
 
 if __name__ == "__main__":
     main()
